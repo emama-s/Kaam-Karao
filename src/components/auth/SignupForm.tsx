@@ -43,7 +43,7 @@ export function SignupForm() {
         description: "You have successfully created an account",
       });
       
-      navigate("/dashboard");
+      navigate("/login");
     } catch (error) {
       console.error("Signup failed:", error);
       toast({
