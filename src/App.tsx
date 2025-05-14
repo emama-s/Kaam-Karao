@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -19,6 +18,12 @@ import BookingsPage from "./pages/dashboard/BookingsPage";
 import MessagesPage from "./pages/dashboard/MessagesPage";
 import ServiceDetailPage from "./pages/services/ServiceDetailPage";
 import NotFound from "./pages/NotFound";
+
+// Provider pages
+import MyServicesPage from "./pages/dashboard/provider/MyServicesPage";
+import ReviewsPage from "./pages/dashboard/provider/ReviewsPage";
+import ProfilePage from "./pages/dashboard/provider/ProfilePage";
+import SettingsPage from "./pages/dashboard/provider/SettingsPage";
 
 // Components
 import { ProtectedRoute } from "./components/layout/ProtectedRoute";
@@ -48,6 +53,12 @@ const App = () => (
                   <Route path="/dashboard/search" element={<SearchPage />} />
                   <Route path="/dashboard/bookings" element={<BookingsPage />} />
                   <Route path="/dashboard/messages" element={<MessagesPage />} />
+                  
+                  {/* Provider-specific routes */}
+                  <Route path="/dashboard/services" element={<MyServicesPage />} />
+                  <Route path="/dashboard/reviews" element={<ReviewsPage />} />
+                  <Route path="/dashboard/profile" element={<ProfilePage />} />
+                  <Route path="/dashboard/settings" element={<SettingsPage />} />
                 </Route>
                 
                 {/* Catch-all route */}
