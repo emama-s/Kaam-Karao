@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -15,7 +14,7 @@ export function SignupForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [role, setRole] = useState<"customer" | "provider">("customer");
+  const [role, setRole] = useState<"customer" | "service_provider">("customer");
   const [isLoading, setIsLoading] = useState(false);
 
   const { signup } = useAuth();
@@ -115,7 +114,7 @@ export function SignupForm() {
               <RadioGroup 
                 defaultValue="customer" 
                 value={role}
-                onValueChange={(value) => setRole(value as "customer" | "provider")}
+                onValueChange={(value) => setRole(value as "customer" | "service_provider")}
                 className="flex gap-4"
               >
                 <div className="flex items-center space-x-2">
@@ -123,8 +122,8 @@ export function SignupForm() {
                   <Label htmlFor="customer">Customer</Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="provider" id="provider" />
-                  <Label htmlFor="provider">Service Provider</Label>
+                  <RadioGroupItem value="service_provider" id="service_provider" />
+                  <Label htmlFor="service_provider">Service Provider</Label>
                 </div>
               </RadioGroup>
             </div>

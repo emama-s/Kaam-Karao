@@ -1,14 +1,13 @@
-
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
-type Role = "customer" | "provider";
+type Role = "customer" | "service_provider";
 
 interface User {
-  id: string;
+  _id: string;
   name: string;
   email: string;
   role: Role;
-  avatar?: string;
+  createdAt: string;
 }
 
 interface AuthContextType {
@@ -16,31 +15,13 @@ interface AuthContextType {
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
   signup: (name: string, email: string, password: string, role: Role) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Mock users for demo
-const MOCK_USERS = [
-  {
-    id: "1",
-    name: "John Customer",
-    email: "customer@example.com",
-    password: "password",
-    role: "customer" as Role,
-    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=256&q=80"
-  },
-  {
-    id: "2",
-    name: "Mary Provider",
-    email: "provider@example.com",
-    password: "password",
-    role: "provider" as Role,
-    avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=256&q=80"
-  }
-];
+const API_URL = "http://localhost:5000/api";
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -57,51 +38,74 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = async (email: string, password: string) => {
     setLoading(true);
-    // Simulate API call delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
     
-    const foundUser = MOCK_USERS.find(
-      (u) => u.email === email && u.password === password
-    );
-    
-    if (!foundUser) {
+    try {
+      const response = await fetch(`${API_URL}/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+        credentials: "include", // Important for cookies/session
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || "Login failed");
+      }
+      
+      setUser(data.data);
+      localStorage.setItem("kaamUser", JSON.stringify(data.data));
+    } catch (error) {
+      console.error("Login error:", error);
+      throw error;
+    } finally {
       setLoading(false);
-      throw new Error("Invalid email or password");
     }
-    
-    const { password: _, ...userWithoutPassword } = foundUser;
-    setUser(userWithoutPassword);
-    localStorage.setItem("kaamUser", JSON.stringify(userWithoutPassword));
-    setLoading(false);
   };
 
   const signup = async (name: string, email: string, password: string, role: Role) => {
     setLoading(true);
-    // Simulate API call delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
     
-    const userExists = MOCK_USERS.some((u) => u.email === email);
-    if (userExists) {
+    try {
+      const response = await fetch(`${API_URL}/auth/signup`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name, email, password, role }),
+        credentials: "include", // Important for cookies/session
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || "Signup failed");
+      }
+      
+      setUser(data.data);
+      localStorage.setItem("kaamUser", JSON.stringify(data.data));
+    } catch (error) {
+      console.error("Signup error:", error);
+      throw error;
+    } finally {
       setLoading(false);
-      throw new Error("User with this email already exists");
     }
-    
-    const newUser = {
-      id: `user_${Date.now()}`,
-      name,
-      email,
-      role,
-      avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random`
-    };
-    
-    setUser(newUser);
-    localStorage.setItem("kaamUser", JSON.stringify(newUser));
-    setLoading(false);
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem("kaamUser");
+  const logout = async () => {
+    try {
+      await fetch(`${API_URL}/auth/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
+    } catch (error) {
+      console.error("Logout error:", error);
+    } finally {
+      setUser(null);
+      localStorage.removeItem("kaamUser");
+    }
   };
 
   return (

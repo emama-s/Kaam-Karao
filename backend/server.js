@@ -4,36 +4,41 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import session from 'express-session';
 import MongoStore from 'connect-mongo';
+import dotenv from 'dotenv';
 import authRoutes from './routes/authRoutes.js';
-import { protect, admin } from './middlewares/auth.js'; // Updated import path
+import { protect, admin } from './middlewares/auth.js';
+import { MONGODB_URI, PORT, SESSION_SECRET, CORS_ORIGIN, SESSION_COOKIE_MAX_AGE } from './config/config.js';
+
+// Load environment variables
+dotenv.config();
 
 const app = express();
 
 // Middleware
 app.use(cors({
-  origin: 'http://localhost:3000', // Your frontend URL
+  origin: CORS_ORIGIN,
   credentials: true
 }));
+
 app.use(bodyParser.json());
 
 // Session middleware
 app.use(session({
-  secret: 'your-secret-key',
+  secret: SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
   store: MongoStore.create({
-    mongoUrl: 'mongodb://localhost:27017/kaamkrao',
+    mongoUrl: MONGODB_URI,
     ttl: 24 * 60 * 60 // 1 day
   }),
   cookie: {
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
-    maxAge: 24 * 60 * 60 * 1000 // 1 day
+    maxAge: SESSION_COOKIE_MAX_AGE
   }
 }));
 
 // MongoDB Connection
-const MONGODB_URI = "mongodb://localhost:27017/kaamkrao";
 mongoose.connect(MONGODB_URI)
   .then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('MongoDB connection error:', err));
@@ -62,7 +67,6 @@ app.use((err, req, res, next) => {
 });
 
 // Start Server
-const PORT = 5000;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
