@@ -5,12 +5,19 @@ import cors from 'cors';
 import session from 'express-session';
 import MongoStore from 'connect-mongo';
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import authRoutes from './routes/authRoutes.js';
-import { protect, admin } from './middlewares/auth.js';
+import serviceRoutes from './routes/serviceRoutes.js';
+import { protect, serviceProvider } from './middlewares/auth.js';
 import { MONGODB_URI, PORT, SESSION_SECRET, CORS_ORIGIN, SESSION_COOKIE_MAX_AGE } from './config/config.js';
 
 // Load environment variables
 dotenv.config();
+
+// ES module __dirname equivalent
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 
@@ -21,6 +28,9 @@ app.use(cors({
 }));
 
 app.use(bodyParser.json());
+
+// Serve static files
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Session middleware
 app.use(session({
@@ -45,15 +55,16 @@ mongoose.connect(MONGODB_URI)
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/services', serviceRoutes);
 
 // Add a protected test route
 app.get('/api/protected', protect, (req, res) => {
     res.json({ message: 'Protected route accessed', user: req.user });
 });
 
-// Add an admin test route
-app.get('/api/admin', protect, admin, (req, res) => {
-    res.json({ message: 'Admin route accessed', user: req.user });
+// Add a service provider test route
+app.get('/api/service-provider', protect, serviceProvider, (req, res) => {
+    res.json({ message: 'Service provider route accessed', user: req.user });
 });
 
 // Error handling middleware

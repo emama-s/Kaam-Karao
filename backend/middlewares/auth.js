@@ -33,8 +33,8 @@ export const protect = async (req, res, next) => {
   }
 };
 
-// Middleware to check if user is admin
-export const admin = (req, res, next) => {
+// Middleware to check if user is a service provider
+export const serviceProvider = (req, res, next) => {
   if (req.user && req.user.role === "service_provider") {
     next();
   } else {
